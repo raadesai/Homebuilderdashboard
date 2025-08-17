@@ -18,11 +18,25 @@ export default function Documents() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [currentUser, setCurrentUser] = useState<any>(null)
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
   useEffect(() => {
     loadDocuments()
     loadCurrentUser()
   }, [currentProject])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (openMenuId && !(event.target as Element).closest('.relative')) {
+        setOpenMenuId(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [openMenuId])
 
   const loadCurrentUser = async () => {
     const user = await getCurrentUser()
@@ -263,7 +277,7 @@ export default function Documents() {
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-visible">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
@@ -310,29 +324,46 @@ export default function Documents() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end space-x-2">
+                      <div className="relative">
                         <button 
-                          onClick={() => handleViewDocument(doc)}
-                          className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                          title="View document"
+                          onClick={() => setOpenMenuId(openMenuId === doc.id ? null : doc.id)}
+                          className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                          title="Actions"
                         >
-                          <span>👁️</span>
+                          <span className="text-lg">⋮</span>
                         </button>
-                        <button 
-                          onClick={() => handleDownloadDocument(doc)}
-                          className="p-2 text-gray-400 hover:text-green-600 transition-colors"
-                          title="Download document"
-                        >
-                          <span>⬇️</span>
-                        </button>
-                        {(currentUser?.id === doc.uploaded_by || currentUser?.role === 'admin') && (
-                          <button 
-                            onClick={() => handleDeleteDocument(doc)}
-                            className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                            title="Delete document"
-                          >
-                            <span>🗑️</span>
-                          </button>
+                        {openMenuId === doc.id && (
+                          <div className="absolute right-0 top-8 w-48 bg-white rounded-md shadow-lg border z-50">
+                            <div className="py-1">
+                              <button
+                                onClick={() => {
+                                  handleViewDocument(doc)
+                                  setOpenMenuId(null)
+                                }}
+                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              >
+                                View Document
+                              </button>
+                              <button
+                                onClick={() => {
+                                  handleDownloadDocument(doc)
+                                  setOpenMenuId(null)
+                                }}
+                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              >
+                                Download
+                              </button>
+                              <button
+                                onClick={() => {
+                                  handleDeleteDocument(doc)
+                                  setOpenMenuId(null)
+                                }}
+                                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
                         )}
                       </div>
                     </td>
