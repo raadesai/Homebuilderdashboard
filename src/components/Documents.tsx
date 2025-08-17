@@ -163,6 +163,11 @@ export default function Documents() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
+  const getFileType = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toUpperCase()
+    return extension || 'FILE'
+  }
+
   const categories = [
     { key: 'all', label: 'All Documents', icon: '📁' },
     { key: 'contract', label: 'Contracts', icon: '📄' },
@@ -247,66 +252,96 @@ export default function Documents() {
             <span className="ml-2 text-sm text-gray-500">({filteredDocuments.length})</span>
           </h3>
         </div>
-        <div className="divide-y">
-          {filteredDocuments.length === 0 ? (
-            <div className="p-12 text-center">
-              <p className="text-gray-500">No documents found in this category.</p>
-              <button 
-                onClick={() => setShowUploadModal(true)}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Upload First Document
-              </button>
-            </div>
-          ) : (
-            filteredDocuments.map((doc) => (
-              <div key={doc.id} className="p-6 hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <span className="text-2xl">{getDocumentIcon(doc.category)}</span>
-                    <div>
-                      <h4 className="font-medium text-gray-900">{doc.name}</h4>
-                      <p className="text-sm text-gray-500">
-                        Uploaded on {new Date(doc.created_at).toLocaleDateString()} • {formatFileSize(doc.file_size || 0)}
-                        {doc.uploaded_by && (
-                          <span> • by {doc.uploaded_by.first_name} {doc.uploaded_by.last_name}</span>
-                        )}
-                      </p>
-                      {doc.description && (
-                        <p className="text-sm text-gray-600 mt-1">{doc.description}</p>
+        {filteredDocuments.length === 0 ? (
+          <div className="p-12 text-center">
+            <p className="text-gray-500">No documents found in this category.</p>
+            <button 
+              onClick={() => setShowUploadModal(true)}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Upload First Document
+            </button>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    File
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Uploaded
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredDocuments.map((doc) => (
+                  <tr key={doc.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-xl">{getDocumentIcon(doc.category)}</span>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{doc.name}</div>
+                          <div className="text-sm text-gray-500">{formatFileSize(doc.file_size || 0)}</div>
+                          {doc.description && (
+                            <div className="text-sm text-gray-600 mt-1">{doc.description}</div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {getFileType(doc.name)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div>{new Date(doc.created_at).toLocaleDateString()}</div>
+                      {doc.uploaded_by && (
+                        <div className="text-xs text-gray-400">
+                          by {doc.uploaded_by.first_name} {doc.uploaded_by.last_name}
+                        </div>
                       )}
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <button 
-                      onClick={() => handleViewDocument(doc)}
-                      className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                      title="View document"
-                    >
-                      <span>👁️</span>
-                    </button>
-                    <button 
-                      onClick={() => handleDownloadDocument(doc)}
-                      className="p-2 text-gray-400 hover:text-green-600 transition-colors"
-                      title="Download document"
-                    >
-                      <span>⬇️</span>
-                    </button>
-                    {(currentUser?.id === doc.uploaded_by || currentUser?.role === 'admin') && (
-                      <button 
-                        onClick={() => handleDeleteDocument(doc)}
-                        className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                        title="Delete document"
-                      >
-                        <span>🗑️</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end space-x-2">
+                        <button 
+                          onClick={() => handleViewDocument(doc)}
+                          className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                          title="View document"
+                        >
+                          <span>👁️</span>
+                        </button>
+                        <button 
+                          onClick={() => handleDownloadDocument(doc)}
+                          className="p-2 text-gray-400 hover:text-green-600 transition-colors"
+                          title="Download document"
+                        >
+                          <span>⬇️</span>
+                        </button>
+                        {(currentUser?.id === doc.uploaded_by || currentUser?.role === 'admin') && (
+                          <button 
+                            onClick={() => handleDeleteDocument(doc)}
+                            className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                            title="Delete document"
+                          >
+                            <span>🗑️</span>
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Upload Modal */}
@@ -315,6 +350,7 @@ export default function Documents() {
           onClose={() => setShowUploadModal(false)}
           onUpload={handleFileUpload}
           uploading={uploading}
+          defaultCategory={selectedCategory === 'all' ? 'contract' : selectedCategory}
         />
       )}
     </div>
@@ -322,13 +358,14 @@ export default function Documents() {
 }
 
 // Upload Modal Component
-function UploadModal({ onClose, onUpload, uploading }: {
+function UploadModal({ onClose, onUpload, uploading, defaultCategory = 'contract' }: {
   onClose: () => void
   onUpload: (file: File, category: string, description: string) => void
   uploading: boolean
+  defaultCategory?: string
 }) {
   const [file, setFile] = useState<File | null>(null)
-  const [category, setCategory] = useState('other')
+  const [category, setCategory] = useState(defaultCategory)
   const [description, setDescription] = useState('')
   const [dragOver, setDragOver] = useState(false)
 
