@@ -151,7 +151,6 @@ export default function Documents() {
       case 'plan': return '📋'
       case 'photo': return '📸'
       case 'invoice': return '🧾'
-      case 'video': return '🎥'
       default: return '📁'
     }
   }
@@ -170,7 +169,6 @@ export default function Documents() {
     { key: 'permit', label: 'Permits', icon: '🏛️' },
     { key: 'plan', label: 'Plans', icon: '📋' },
     { key: 'photo', label: 'Photos', icon: '📸' },
-    { key: 'video', label: 'Videos', icon: '🎥' },
     { key: 'invoice', label: 'Invoices', icon: '🧾' },
     { key: 'other', label: 'Other', icon: '📄' }
   ]
@@ -214,28 +212,6 @@ export default function Documents() {
         </button>
       </div>
 
-      {/* Category Filter */}
-      <div className="flex space-x-2 overflow-x-auto pb-2">
-        {categories.map((category) => (
-          <button
-            key={category.key}
-            onClick={() => setSelectedCategory(category.key)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
-              selectedCategory === category.key
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-50 border'
-            }`}
-          >
-            <span>{category.icon}</span>
-            <span>{category.label}</span>
-            {category.key !== 'all' && (
-              <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">
-                {getDocumentsByCategory(category.key).length}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
 
       {/* Documents Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -448,7 +424,7 @@ function UploadModal({ onClose, onUpload, uploading }: {
               <option value="permit">Permit</option>
               <option value="plan">Plan</option>
               <option value="photo">Photo</option>
-              <option value="video">Video</option>
+
               <option value="invoice">Invoice</option>
               <option value="other">Other</option>
             </select>
